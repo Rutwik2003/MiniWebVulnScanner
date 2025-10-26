@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Results - Mini Web Vulnerability Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .scan-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .scan-info-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .scan-info-item strong {
+            color: #333;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #721c24;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #155724;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .vuln-type {
+            font-weight: 600;
+            color: #dc3545;
+        }
+        
+        .payload {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        
+        .remediation {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 15px;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn-report {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .summary-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .no-vulns {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-vulns-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Scan Results</h1>
+        
+        <div class="scan-info">
+            <div class="scan-info-item">
+                <strong>Target URL:</strong> {{ results.url }}
+            </div>
+            <div class="scan-info-item">
+                <strong>Targets Found:</strong> {{ results.targets_found }}
+                {% if results.targets_found > 0 %}
+                    <span class="status-badge badge-info">{{ results.targets_found }} testable endpoint(s)</span>
+                {% endif %}
+            </div>
+            <div class="scan-info-item">
+                <strong>Vulnerabilities Detected:</strong> {{ results.vulnerabilities|length }}
+                {% if results.vulnerabilities|length > 0 %}
+                    <span class="status-badge badge-danger">⚠️ Issues Found</span>
+                {% else %}
+                    <span class="status-badge badge-success">✓ No Issues</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if results.errors %}
+            <div class="error-message">
+                <strong>⚠️ Errors During Scan:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    {% for error in results.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        
+        {% if results.vulnerabilities %}
+            <div class="summary-grid">
+                <div class="summary-card" style="border-left-color: #dc3545;">
+                    <div class="summary-number" style="color: #dc3545;">
+                        {{ results.vulnerabilities|selectattr('vuln_type', 'equalto', 'SQL Injection')|list|length }}
+                    </div>
+                    <div class="summary-label">SQL Injection</div>
+                </div>
+                <div class="summary-card" style="border-left-color: #ff6b6b;">
+                    <div class="summary-number" style="color: #ff6b6b;">
+                        {{ results.vulnerabilities|selectattr('vuln_type', 'equalto', 'Reflected XSS')|list|length }}
+                    </div>
+                    <div class="summary-label">Reflected XSS</div>
+                </div>
+                <div class="summary-card" style="border-left-color: #e74c3c;">
+                    <div class="summary-number" style="color: #e74c3c;">
+                        {{ results.vulnerabilities|selectattr('vuln_type', 'equalto', 'Command Injection')|list|length }}
+                    </div>
+                    <div class="summary-label">Command Injection</div>
+                </div>
+                <div class="summary-card" style="border-left-color: #f39c12;">
+                    <div class="summary-number" style="color: #f39c12;">
+                        {{ results.vulnerabilities|selectattr('vuln_type', 'equalto', 'Path Traversal')|list|length }}
+                    </div>
+                    <div class="summary-label">Path Traversal</div>
+                </div>
+                <div class="summary-card" style="border-left-color: #e67e22;">
+                    <div class="summary-number" style="color: #e67e22;">
+                        {{ results.vulnerabilities|selectattr('vuln_type', 'equalto', 'LDAP Injection')|list|length }}
+                    </div>
+                    <div class="summary-label">LDAP Injection</div>
+                </div>
+                <div class="summary-card" style="border-left-color: #c0392b;">
+                    <div class="summary-number" style="color: #c0392b;">
+                        {{ results.vulnerabilities|selectattr('vuln_type', 'equalto', 'XML External Entity (XXE)')|list|length }}
+                    </div>
+                    <div class="summary-label">XXE</div>
+                </div>
+            </div>
+            
+            <h2 class="section-title">🚨 Vulnerability Details</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Field</th>
+                        <th>Vulnerability</th>
+                        <th>Payload</th>
+                        <th>Confidence</th>
+                        <th>Remediation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vuln in results.vulnerabilities %}
+                        <tr>
+                            <td style="word-break: break-all; max-width: 200px;">{{ vuln.url }}</td>
+                            <td>
+                                <span class="status-badge {% if vuln.method == 'GET' %}badge-info{% else %}badge-warning{% endif %}">
+                                    {{ vuln.method }}
+                                </span>
+                            </td>
+                            <td><strong>{{ vuln.field }}</strong></td>
+                            <td><span class="vuln-type">{{ vuln.vuln_type }}</span></td>
+                            <td><code class="payload">{{ vuln.payload }}</code></td>
+                            <td>
+                                <span class="status-badge badge-warning">{{ vuln.confidence }}</span>
+                            </td>
+                            <td class="remediation">{{ vuln.remediation }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            {% if not results.errors %}
+                <div class="no-vulns">
+                    <div class="no-vulns-icon">✅</div>
+                    <h3>No Vulnerabilities Detected</h3>
+                    <p>The scan completed successfully with no obvious SQLi or XSS vulnerabilities found.</p>
+                    <p style="margin-top: 10px; font-size: 13px; color: #888;">
+                        Note: This is a basic scanner. False negatives are possible. Professional testing recommended.
+                    </p>
+                </div>
+            {% endif %}
+        {% endif %}
+        
+        <div style="margin-top: 30px;">
+            <a href="/" class="btn-back">← New Scan</a>
+            <form method="POST" action="/generate-report" style="display: inline;">
+                <input type="hidden" name="results" value='{{ results|tojson }}'>
+                <button type="submit" class="btn-report">📄 Generate Report</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
